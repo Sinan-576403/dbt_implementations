@@ -1,0 +1,235 @@
+version: 2
+
+models:
+  - name: stg_covid
+    description: >
+      Staging-Modell für Rohdaten der COVID-Tabelle mit Typkonvertierungen
+      und grundlegender Datenbereinigung.
+    columns:
+      - name: id
+        description: "Eindeutige Kennung pro Zeile"
+        tests:
+          - not_null
+          - unique
+      - name: datum
+        description: "Datum der Erhebung"
+        tests:
+          - not_null
+      - name: fallzahl
+        description: "Gesamtzahl aller bisherigen COVID-Fälle"
+      - name: neue_faelle
+        description: "Neu gemeldete Fälle am Tag"
+      - name: todesfaelle
+        description: "Anzahl der COVID-bedingten Todesfälle"
+      - name: inzidenz_7tage
+        description: "Sieben-Tage-Inzidenz"
+      - name: inzidenz_veraenderung
+        description: "Relative Veränderung der Inzidenz"
+      - name: hospitalisierung_7tage
+        description: "Hospitalisierungsinzidenz"
+      - name: its_belegung
+        description: "Belegung der Intensivstationen"
+
+  - name: int_covid_saeuberung
+    description: >
+      Intermediate-Modell mit bereinigten numerischen Werten
+      und zusätzlichen berechneten Kennzahlen.
+    columns:
+      - name: id
+        description: "Eindeutige ID"
+      - name: datum
+        description: "Erhebungsdatum"
+      - name: fallzahl
+        description: "Gesamtzahl aller bisherigen COVID-Fälle"
+      - name: neue_faelle
+        description: "Neu gemeldete Fälle am Tag"
+      - name: todesfaelle
+        description: "Anzahl der COVID-bedingten Todesfälle"
+      - name: inzidenz_7tage
+        description: "Sieben-Tage-Inzidenz"
+      - name: inzidenz_veraenderung
+        description: "Relative Veränderung der Inzidenz"
+      - name: hospitalisierung_7tage
+        description: "Hospitalisierungsinzidenz"
+      - name: its_belegung
+        description: "Belegung der Intensivstationen"
+        tests:
+          - not_null
+          - dbt_utils.accepted_range:
+              min_value: 0
+              max_value: 1
+      - name: geschaetzte_gesamtfaelle
+        description: "Fallzahl + neue Fälle (Schätzung)"
+      - name: auslastung_its_kategorie
+        description: "ITS-Auslastungskategorie (niedrig, mittel, hoch)"
+
+  - name: int_covid_trends
+    description: >
+      Modell zur Analyse zeitlicher Entwicklungen in den COVID-Daten,
+      inklusive Differenzen und gleitender Durchschnitte.
+    columns:
+      - name: datum
+        description: "Datum der Erhebung"
+        tests: [not_null]
+      - name: neue_faelle
+        description: "Neu gemeldete Fälle am Tag"
+      - name: diff_neue_faelle
+        description: "Tägliche Differenz der neuen Fälle"
+      - name: gleit_mittel_neue_faelle
+        description: "Gleitender 3-Tages-Durchschnitt der neuen Fälle"
+      - name: inzidenz_7tage
+        description: "Sieben-Tage-Inzidenz"
+      - name: gleit_mittel_inzidenz
+        description: "Gleitender 3-Tages-Durchschnitt der Inzidenz"
+
+  - name: mart_covid_kennzahlen
+    description: >
+      Wöchentliche Aggregation wichtiger COVID-Kennzahlen wie neue Fälle,
+      ITS-Belegung und Inzidenz.
+    columns:
+      - name: woche
+        description: "Beginn der Kalenderwoche"
+        tests: [not_null]
+      - name: summe_neue_faelle
+        description: "Gesamtsumme der neuen Fälle in der Woche"
+      - name: avg_neue_faelle
+        description: "Durchschnittlich neue Fälle pro Tag"
+      - name: max_neue_faelle
+        description: "Tagesmaximum an neuen Fällen"
+      - name: avg_its_belegung
+        description: "Durchschnittliche ITS-Belegung (Skala 0–1)"
+      - name: max_its_belegung
+        description: "Maximale ITS-Belegung (Skala 0–1)"
+      - name: avg_inzidenz_7tage
+        description: "Durchschnittliche 7-Tage-Inzidenz"
+
+  - name: mart_covid_wochenuebersicht
+    description: >
+      Marts-Modell mit wöchentlichen Aggregationen von COVID-Kennzahlen,
+      basierend auf bereinigten Daten.
+    columns:
+      - name: woche
+        description: "Beginn der Kalenderwoche"
+        tests: [not_null]
+      - name: summe_neue_faelle
+        description: "Summe der neu gemeldeten Fälle pro Woche"
+      - name: summe_todesfaelle
+        description: "Summe der Todesfälle pro Woche"
+      - name: max_inzidenz_7tage
+        description: "Maximale 7-Tage-Inzidenz pro Woche"
+      - name: avg_its_belegung
+        description: "Durchschnittliche ITS-Auslastung in der Woche"
+
+  - name: mart_covid_vergleich
+    description: >
+      Aggregiertes Marts-Modell mit Vergleichskennzahlen wie
+      Maxima, Minima und Durchschnittswerten über den gesamten Zeitraum.
+    columns:
+      - name: start_datum
+        description: "Frühestes Datum im Datensatz"
+      - name: end_datum
+        description: "Spätestes Datum im Datensatz"
+      - name: max_fallzahl
+        description: "Höchste Fallzahl"
+      - name: min_fallzahl
+        description: "Niedrigste Fallzahl"
+      - name: avg_fallzahl
+        description: "Durchschnittliche Fallzahl"
+      - name: max_neue_faelle
+        description: "Höchste Anzahl neuer Fälle"
+      - name: avg_inzidenz
+        description: "Durchschnittliche Inzidenz"
+      - name: max_its
+        description: "Maximale ITS-Belegung"
+      - name: avg_its
+        description: "Durchschnittliche ITS-Belegung"
+
+
+  - name: dim_datum
+    description: "Kalenderdimension basierend auf Datum"
+    columns:
+      - name: datum_id
+        description: "Primärschlüssel – Tagesdatum"
+        tests: [not_null, unique]
+
+        
+  - name: fact_covid_metrics
+    description: "Faktentabelle mit Metriken zu COVID-Fällen, pro Tag"
+    columns:
+      - name: id
+        description: "Primärschlüssel der täglichen COVID-Faktentabelle"
+        tests: [not_null, unique]
+      - name: datum_id
+        description: "Fremdschlüssel zum Datum"
+        tests: [not_null]
+      - name: fallzahl
+        description: "Gesamtzahl aller Fälle"
+      - name: neue_faelle
+        description: "Neu gemeldete Fälle"
+      - name: todesfaelle
+        description: "Todesfälle"
+      - name: inzidenz_7tage
+        description: "7-Tage-Inzidenz"
+      - name: inzidenz_veraenderung
+        description: "Veränderung zur Vorperiode"
+      - name: hospitalisierung_7tage
+        description: "7-Tage-Hospitalisierungsinzidenz"
+      - name: its_belegung
+        description: "ITS-Auslastung (0–1)"
+      - name: inzidenz_kategorie_id
+        description: "Fremdschlüssel zur Inzidenzkategorie"
+      - name: auslastung_its_kategorie_id
+        description: "Fremdschlüssel zur ITS-Kategorie"
+      - name: inzidenz_trend_kategorie_id
+        description: "Fremdschlüssel zur Trend-Kategorie"
+
+  - name: dim_inzidenz_kategorie
+    description: "Kategorisierung der Inzidenzwerte"
+    columns:
+      - name: inzidenz_kategorie_id
+        description: "Primärschlüssel für Inzidenz-Kategorien"
+        tests: [not_null, unique]
+      - name: bezeichnung
+        description: "Kategoriebezeichnung (niedrig, mittel, hoch)"
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['niedrig', 'mittel', 'hoch']
+      - name: min_wert
+        description: "Untere Grenze des Wertebereichs"
+      - name: max_wert
+        description: "Obere Grenze des Wertebereichs (optional)"
+
+  - name: dim_auslastung_its
+    description: "Kategorisierung der ITS-Belegung"
+    columns:
+      - name: auslastung_its_kategorie_id
+        description: "Primärschlüssel für ITS-Auslastungskategorien"
+        tests: [not_null, unique]
+      - name: bezeichnung
+        description: "Kategoriebezeichnung (niedrig, mittel, hoch)"
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['niedrig', 'mittel', 'hoch']
+      - name: min_wert
+        description: "Untere Grenze"
+      - name: max_wert
+        description: "Obere Grenze (optional)"
+
+  - name: dim_inzidenz_trend
+    description: >
+      Klassifizierung der Veränderung der 7-Tage-Inzidenz in Trend-Kategorien.
+    columns:
+      - name: inzidenz_trend_kategorie_id
+        description: "Primärschlüssel für Trend-Kategorien"
+        tests: [not_null, unique]
+      - name: trend_kategorie
+        description: "Bezeichnung (z. B. steigend, fallend)"
+        tests: [not_null]
+      - name: beschreibung
+        description: "Langtext zur Kategorie"
+      - name: min_wert
+        description: "Untere Grenze"
+      - name: max_wert
+        description: "Obere Grenze (optional)"

@@ -1,0 +1,9 @@
+version: 2
+
+sources:
+  - name: covid_schema
+    database: mein_dbt_db
+    schema: public
+    tables:
+      - name: covid
+        description: "Original importierte COVID-Seed-Daten aus der csv-Datei."

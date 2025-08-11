@@ -1,0 +1,23 @@
+name: 'veranstaltungen_manuell'
+version: '1.0.0'
+
+profile: 'veranstaltungen_manuell'
+
+model-paths: ["models"]
+analysis-paths: ["analyses"]
+test-paths: ["tests"]
+seed-paths: ["seeds"]
+macro-paths: ["macros"]
+snapshot-paths: ["snapshots"]
+
+clean-targets:        
+  - "target"
+  - "dbt_packages"
+
+models:
+  veranstaltungen_manuell:
+    example:
+      +materialized: view
+
+seeds:
+  +delimiter: ';'

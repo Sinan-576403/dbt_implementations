@@ -1,0 +1,38 @@
+name: veranstaltungen_dbt
+version: 1.0.0
+profile: veranstaltungen_gpt
+
+model-paths: ["models"]
+analysis-paths: ["analyses"]
+test-paths: ["tests"]
+seed-paths: ["seeds"]
+macro-paths: ["macros"]
+snapshot-paths: ["snapshots"]
+
+target-path: "target"
+clean-targets:
+  - "target"
+  - "dbt_packages"
+
+models:
+  veranstaltungen_dbt:
+    staging:
+      +materialized: view
+    intermediate:
+      +materialized: view
+    mart:
+      +materialized: table
+    dimensions:
+      +materialized: table
+    facts:
+      +materialized: incremental
+    scd:
+      +materialized: incremental
+      
+seeds:
+  veranstaltungen_dbt:
+    Veranstaltungen:
+      file: Veranstaltungen.csv
+      delimiter: ";"
+      header: true
+      quote_columns: false

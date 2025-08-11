@@ -1,0 +1,270 @@
+version: 2
+
+models:
+  - name: stg_veranstaltungen
+    description: >
+      Staging-Modell für strukturierte Daten zu öffentlichen Veranstaltungen.
+      Die Quelldaten stammen aus der CSV-Datei `Veranstaltungen.csv` und werden
+      in verständlich benannte Spalten transformiert.
+    columns:
+      - name: id
+        description: "Eindeutige Kennung der Veranstaltung"
+        tests:
+          - not_null
+          - unique
+      - name: titel_kurz
+        description: "Kurzbezeichnung der Veranstaltung"
+      - name: veranstaltungskategorie
+        description: "Übergeordnete Kategorie der Veranstaltung"
+      - name: veranstaltungsart
+        description: "Detaillierte Unterkategorie der Veranstaltung"
+      - name: beginn_datum
+        description: "Startdatum der Veranstaltung"
+      - name: ende_datum
+        description: "Enddatum der Veranstaltung"
+      - name: termine_liste
+        description: "Freitextfeld mit zusätzlichen Terminen"
+      - name: bundesland
+        description: "Name des Bundeslandes"
+      - name: veranstaltungsort
+        description: "Ort, an dem die Veranstaltung stattfindet"
+      - name: veranstalter_name
+        description: "Name des Veranstalters"
+      - name: veranstalter_adresse
+        description: "Anschrift des Veranstalters"
+      - name: veranstalter_telefon
+        description: "Telefonnummer des Veranstalters"
+      - name: veranstalter_fax
+        description: "Faxnummer des Veranstalters"
+      - name: veranstalter_email
+        description: "E-Mail-Adresse des Veranstalters"
+      - name: veranstalter_website
+        description: "Webseite des Veranstalters"
+      - name: zielgruppe
+        description: "Zielgruppe bzw. Teilnehmerkreis"
+      - name: weiterfuehrender_link
+        description: "Externer Link mit weiterführenden Informationen"
+      - name: lfd_nummer
+        description: "Laufende Nummer (interne ID oder Sortierschlüssel)"
+
+  - name: int_veranstaltungen_saeuberung
+    description: >
+      Intermediate-Modell zur Vereinheitlichung und Bereinigung der Veranstaltungsdaten.
+    columns:
+      - name: id
+        description: "Eindeutige Veranstaltungs-ID"
+      - name: kurztitel
+        description: "Kurzer Titel der Veranstaltung"
+      - name: kategorie
+        description: "Oberkategorie der Veranstaltung"
+      - name: unterkategorie
+        description: "Unterkategorie zur weiteren Klassifikation"
+      - name: datum_beginn
+        description: "Startdatum der Veranstaltung"
+      - name: datum_ende
+        description: "Enddatum der Veranstaltung"
+      - name: dauer_in_tagen
+        description: "Dauer der Veranstaltung in Tagen"
+      - name: ort
+        description: "Veranstaltungsort"
+
+  - name: int_veranstaltungen_kommend
+    description: >
+      Intermediate-Modell zur Auswahl aller noch bevorstehenden Veranstaltungen.
+    columns:
+      - name: id
+        description: "Eindeutige ID der Veranstaltung"
+      - name: beginn_datum
+        description: "Startdatum der Veranstaltung"
+      - name: heutiges_datum
+        description: "Das aktuelle Tagesdatum"
+      - name: tage_bis_beginn
+        description: "Anzahl verbleibender Tage bis Veranstaltungsbeginn"
+
+  - name: int_veranstaltungen_kategorisiert
+    description: >
+      Gruppiert Veranstaltungen nach Kategorie und zählt die Häufigkeit.
+    columns:
+      - name: kategorie
+        description: "Oberkategorie der Veranstaltung"
+      - name: unterkategorie
+        description: "Feinere Unterkategorie"
+      - name: anzahl_veranstaltungen
+        description: "Anzahl der Veranstaltungen je Kombination"
+
+  - name: int_veranstaltungen_zeitlich
+    description: >
+      Analysemodell zur Extraktion zeitlicher Informationen.
+    columns:
+      - name: id
+        description: "Eindeutige ID der Veranstaltung"
+        tests:
+          - not_null
+      - name: ort
+        description: "Veranstaltungsort"
+      - name: kategorie
+        description: "Kategorie der Veranstaltung"
+      - name: unterkategorie
+        description: "Unterkategorie"
+      - name: datum_beginn
+        description: "Startdatum"
+      - name: datum_ende
+        description: "Enddatum"
+      - name: jahr
+        description: "Jahr des Beginns"
+      - name: monat
+        description: "Monat (1–12)"
+      - name: wochentag
+        description: "Wochentag (0=So – 6=Sa)"
+      - name: dauer_tage
+        description: "Berechnete Dauer in Tagen"
+
+  - name: int_veranstaltungen_kontakt
+    description: >
+      Modell zur Extraktion und Validierung von Kontaktinformationen.
+    columns:
+      - name: id
+        description: "Veranstaltungs-ID"
+        tests:
+          - not_null
+      - name: va_name
+        description: "Name der Veranstaltung"
+      - name: va_adresse
+        description: "Adresse"
+      - name: va_telefon
+        description: "Telefon"
+      - name: va_fax
+        description: "Fax"
+      - name: va_email
+        description: "E-Mail"
+      - name: va_internet
+        description: "Website"
+      - name: email_valid
+        description: "Gültige E-Mail-Adresse?"
+      - name: internet_valid
+        description: "Gültige Website?"
+
+  - name: int_veranstaltungen_teilnehmer
+    description: >
+      Modell zur Klassifikation nach Zielgruppen.
+    columns:
+      - name: id
+        description: "ID der Veranstaltung"
+        tests:
+          - not_null
+      - name: teilnehmerkreis
+        description: "Originaltext"
+      - name: zielgruppenklassifikation
+        description: "Kategorisierte Zielgruppe"
+
+  - name: dim_orte
+    description: >
+      Dimensionstabelle der Orte und Länder.
+    columns:
+      - name: ort_id
+        description: "Surrogatschlüssel aus Ort und Landname"
+        tests:
+          - not_null
+          - unique
+      - name: ort
+        description: "Ort"
+      - name: landname
+        description: "Bundesland"
+
+  - name: dim_kategorie
+    description: "Dimensionstabelle für Kategorien und Unterkategorien"
+    columns:
+      - name: kategorie_id
+        description: "Schlüssel aus Kategorie und Unterkategorie"
+        tests:
+          - unique
+          - not_null
+      - name: kategorie
+        description: "Oberkategorie"
+      - name: unterkategorie
+        description: "Unterkategorie"
+
+  - name: dim_teilnehmerkreis
+    description: "Dimension für Teilnehmergruppen"
+    columns:
+      - name: teilnehmerkreis_id
+        description: "Schlüssel basierend auf teilnehmerkreis"
+        tests:
+          - unique
+          - not_null
+      - name: teilnehmerkreis
+        description: "Zielgruppe"
+
+  - name: mart_veranstaltungen_monatlich
+    description: >
+      Monatliche Aggregation nach Kategorie.
+    columns:
+      - name: monat
+        description: "Monat der Aggregation"
+        tests:
+          - not_null
+      - name: kategorie
+        description: "Veranstaltungskategorie"
+        tests:
+          - not_null
+      - name: anzahl_veranstaltungen
+        description: "Veranstaltungsanzahl"
+        tests:
+          - not_null
+          - dbt_utils.expression_is_true:
+              expression: ">= 0"
+
+  - name: fact_veranstaltungen
+    description: "Faktentabelle mit aggregierten Veranstaltungskennzahlen"
+    columns:
+      - name: kategorie_id
+        description: "Referenz auf dim_kategorie"
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_kategorie')
+              field: kategorie_id
+      - name: ort_id
+        description: "Referenz auf dim_orte"
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_orte')
+              field: ort_id
+      - name: kategorie
+        description: "Semantische Beschreibung der Kategorie"
+      - name: unterkategorie
+        description: "Feinere Unterkategorie der Veranstaltung"
+      - name: anzahl_veranstaltungen
+        description: "Anzahl der Veranstaltungen in dieser Kategorie/Ort-Kombination"
+      - name: durchschn_dauer_tage
+        description: "Durchschnittliche Dauer der Veranstaltungen in Tagen"
+
+
+snapshots:
+  - name: scd_kategorie
+    description: >
+      Slowly Changing Dimension Snapshot für Kategorien und Unterkategorien.
+      Verfolgt Änderungen historisch mit Zeitstempel.
+    columns:
+      - name: kategorie
+        description: "Oberkategorie"
+      - name: unterkategorie
+        description: "Unterkategorie"
+      - name: snapshot_updated_at
+        description: "Zeitpunkt der letzten Änderung"
+        tests:
+          - not_null
+
+  - name: scd_orte
+    description: >
+      Slowly Changing Dimension Snapshot für Orte und Länder.
+    columns:
+      - name: ort
+        description: "Veranstaltungsort"
+      - name: landname
+        description: "Zugehöriges Bundesland"
+      - name: snapshot_updated_at
+        description: "Zeitpunkt der letzten Änderung"
+        tests:
+          - not_null

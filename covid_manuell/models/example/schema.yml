@@ -1,0 +1,152 @@
+version: 2
+
+models:
+  - name: stg_covid
+    description: "Staging-Modell für die COVID-Rohdaten. Führt Typumwandlung und erste Bereinigung durch."
+    columns:
+      - name: id
+        description: "Eindeutige Kennung pro Zeile aus der Rohdatendatei."
+        tests:
+          - not_null
+          - unique
+
+      - name: datum
+        description: "Das Datum der Erhebung, umgewandelt in einen echten Datumstyp."
+        tests:
+          - not_null
+
+      - name: fallzahl
+        description: "Die kumulierte Gesamtzahl der Fälle."
+
+      - name: neue_faelle
+        description: "Die an diesem Tag gemeldeten neuen Fälle."
+
+      - name: todesfaelle
+        description: "Die kumulierte Gesamtzahl der Todesfälle."
+
+      - name: inzidenz_7tage
+        description: "Die 7-Tage-Inzidenz, als numerischer Wert."
+
+      - name: its_belegung
+        description: "Die Auslastung der Intensivstationen, als numerischer Wert zwischen 0 und 1."
+
+  - name: int_covid_its_kategorisierung
+    description: "Zwischenmodell, das die sauberen Staging-Daten mit zusätzlichen, berechneten Spalten anreichert."
+
+    columns:
+      - name: id
+        description: "Eindeutiger Schlüssel aus dem Staging-Modell."
+        tests:
+          - not_null
+          - unique
+
+      - name: datum
+        description: "Datum der Erhebung."
+        tests:
+          - not_null
+
+      - name: auslastung_its_kategorie
+        description: "Kategorisierung der ITS-Auslastung in 'hoch', 'mittel' oder 'niedrig'."
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['hoch', 'mittel', 'niedrig']      
+
+  - name: mart_covid_weekly_summary
+    description: "Aggregiert die bereinigten COVID-Daten auf wöchentlicher Basis, um Trends und Kennzahlen zu zeigen."
+
+    columns:
+      - name: woche
+        description: "Der erste Tag der Woche, dient als eindeutiger Schlüssel für die Aggregation."
+        tests:
+          - not_null
+          - unique
+
+      - name: summe_neue_faelle_pro_woche
+        description: "Die Gesamtzahl der neu gemeldeten Fälle in der jeweiligen Woche."
+        tests:
+          - not_null
+
+      - name: summe_todesfaelle_pro_woche
+        description: "Die Gesamtzahl der Todesfälle in der jeweiligen Woche."
+        tests:
+          - not_null
+          
+      - name: hoechste_inzidenz_der_woche
+        description: "Die maximale 7-Tage-Inzidenz, die in dieser Woche erreicht wurde."
+
+      - name: durchschnittliche_its_auslastung
+        description: "Die durchschnittliche Auslastung der Intensivstationen in dieser Woche (0 bis 1)."
+        tests:
+          - not_null        
+
+  - name: mart_covid_summary_overall
+    description: "Gesamtübersicht der COVID-Kennzahlen über den gesamten Zeitraum. Enthält nur eine einzige Zeile."
+
+    columns:
+      - name: erstes_datum
+        description: "Das früheste Datum im gesamten Datensatz."
+        tests:
+          - not_null
+
+      - name: letztes_datum
+        description: "Das späteste Datum im gesamten Datensatz."
+        tests:
+          - not_null
+
+      - name: gesamt_neue_faelle
+        description: "Die Summe aller neu gemeldeten Fälle über den gesamten Zeitraum."
+        tests:
+          - not_null
+
+      - name: gesamt_todesfaelle
+        description: "Die Summe aller Todesfälle über den gesamten Zeitraum."
+        tests:
+          - not_null
+
+      - name: hoechste_tages_fallzahl
+        description: "Die höchste an einem einzelnen Tag gemeldete Fallzahl."
+
+      - name: hoechste_inzidenz_jemals
+        description: "Die höchste 7-Tage-Inzidenz, die jemals erreicht wurde."
+
+      - name: durchschnittliche_inzidenz
+        description: "Die durchschnittliche 7-Tage-Inzidenz über den gesamten Zeitraum."
+
+  - name: dim_datum
+    description: "Dimensionstabelle, die jeden Tag im Datensatz mit zusätzlichen Attributen wie Jahr, Monat und Woche anreichert."
+    
+    columns:
+      - name: datum_id
+        description: "Der eindeutige Schlüssel für die Datumsdimension (das Datum selbst)."
+        tests:
+          - not_null
+          - unique
+
+      - name: jahr
+        description: "Das Jahr des Datums."
+        tests:
+          - not_null
+          
+      - name: monat
+        description: "Der Monat des Datums (1-12)."
+        tests:
+          - not_null
+
+  - name: fct_covid_kennzahlen
+    description: "Faktentabelle, die die täglichen, messbaren COVID-Kennzahlen enthält. Jede Zeile repräsentiert einen Tag."
+    
+    columns:
+      - name: id
+        description: "Der Primärschlüssel dieser Faktentabelle."
+        tests:
+          - not_null
+          - unique
+
+      - name: datum_id
+        description: "Der Fremdschlüssel, der auf die Tabelle 'dim_datum' verweist."
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_datum')
+              field: datum_id

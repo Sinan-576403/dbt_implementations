@@ -1,0 +1,103 @@
+
+version: 2
+
+models:
+  - name: stg_veranstaltungen
+    description: "Bereinigt die Rohdaten aus der Veranstaltungen.csv, benennt Spalten um und korrigiert Datentypen."
+
+    columns:
+      - name: veranstaltung_id
+        description: "Der eindeutige Primärschlüssel für jede Veranstaltung."
+        tests:
+          - unique
+          - not_null
+
+      - name: titel
+        description: "Der offizielle Titel der Veranstaltung."
+        tests:
+          - not_null
+
+      - name: kategorie
+        description: "Die Hauptkategorie der Veranstaltung."
+        tests:
+          - not_null
+
+      - name: unterkategorie
+        description: "Die Unterkategorie. NULL-Werte wurden durch 'Nicht Zugeordnet' ersetzt."
+        tests:
+          - not_null
+
+      - name: start_datum
+        description: "Das Startdatum der Veranstaltung."
+        tests:
+          - not_null
+          
+      - name: ort
+        description: "Der primäre Veranstaltungsort."
+
+
+  - name: int_veranstaltungen_bereinigt
+    description: "Reichert die Staging-Daten der Veranstaltungen mit berechneten Kennzahlen an, wie z.B. der Dauer."
+
+    columns:
+      - name: veranstaltung_id
+        description: "Eindeutiger Schlüssel der Veranstaltung."
+        tests:
+          - unique
+          - not_null
+
+      - name: dauer_in_tagen
+        description: "Die berechnete Dauer der Veranstaltung in Tagen (Ende - Start)."
+        tests:
+          - not_null
+
+
+  - name: dim_kategorien
+    description: "Dimensionstabelle für die eindeutigen Kombinationen von Kategorie und Unterkategorie."
+    columns:
+      - name: kategorie
+        tests:
+          - not_null
+      - name: unterkategorie
+        tests:
+          - not_null
+
+  - name: dim_orte
+    description: "Dimensionstabelle für die eindeutigen Veranstaltungsorte und -länder."
+    columns:
+      - name: ort
+        tests:
+          - not_null
+      - name: land
+        tests:
+          - not_null          
+
+
+  - name: fct_veranstaltungen
+    description: "Faktentabelle mit den Kernmetriken und Schlüsseln für jede einzelne Veranstaltung."
+    columns:
+      - name: veranstaltung_id
+        description: "Primärschlüssel der Veranstaltung."
+        tests:
+          - unique
+          - not_null
+      
+      - name: dauer_in_tagen
+        description: "Die Dauer der Veranstaltung in Tagen."
+        tests:
+          - not_null
+          
+
+  - name: mart_veranstaltungen_pro_kategorie
+    description: "Aggregierter Report, der die Anzahl der Veranstaltungen und deren durchschnittliche Dauer pro Kategorie und Ort anzeigt."
+    columns:
+      - name: kategorie
+        tests:
+          - not_null
+      - name: ort
+        tests:
+          - not_null
+      - name: anzahl_veranstaltungen
+        description: "Gesamtzahl der Veranstaltungen für diese Kombination."
+        tests:
+          - not_null
