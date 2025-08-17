@@ -1,4 +1,4 @@
-# DBT Projekte – COVID & Veranstaltungen (Manuell & GPT)
+# DBT Projekte – COVID - 19 & Veranstaltungen (Manuell & GPT)
 
 Dieses Repository enthält **vier separate DBT-Projekte** die jeweils unterschiedliche Implementierungen für Datenmodellierung und -transformation darstellen:
 
@@ -10,19 +10,26 @@ Dieses Repository enthält **vier separate DBT-Projekte** die jeweils unterschie
 
 4. **veranstaltungen_manuell** – Manuelles Veranstaltungs-DBT-Projekt
 
-
-
-### Ausführungsschritte
-1.  Seeds laden `dbt seed` Lädt die Seed-Daten (z. B. CSV-Dateien) in die Datenbank. 
+### Quellen
+   [Veranstaltungen](https://daten.berlin.de/datensaetze/simple_search_wwwberlindesenarbeitweiterbildungbildungszeitsuche)
    
-2.  Snapshots ausführen (falls vorhanden) `dbt snapshot` Erstellt bzw. aktualisiert Slowly Changing Dimensions (SCD).
+   [Covid-19](https://daten.berlin.de/datensaetze/simple_search_wwwberlindelagesogesundheitinfektionskrankheitencoronatabellebezirkegesamtuebersicht)
    
-3.  Modelle erstellen `dbt run` Erstellt alle DBT-Modelle (Staging, Intermediate, Marts, Dimensions, Facts).
+
+## Ausführungsschritte
+1. Abhängigkeiten installieren: `dbt deps`
+
+2.  Seeds laden `dbt seed` lädt die Seed-Daten (z. B. CSV-Dateien) in die Datenbank.
    
-4.  Tests ausführen `dbt test` Führt Tests aus.
+
+3.  Snapshots ausführen (falls vorhanden) `dbt snapshot` erstellt bzw. aktualisiert Slowly Changing Dimensions (SCD).
+   
+4.  Modelle erstellen `dbt run` erstellt alle DBT-Modelle (Staging, Intermediate, Marts, Dimensions, Facts).
+   
+5.  Tests ausführen `dbt test` führt Tests aus.
 
 
-## Profiles für die jeweiligen DBT-Projekte
+### Profiles für die jeweiligen DBT-Projekte
 
 ```yaml
 covid_manuell:
