@@ -224,7 +224,7 @@ models:
       - name: inzidenz_trend_kategorie_id
         description: "Primärschlüssel für Trend-Kategorien"
         tests: [not_null, unique]
-      - name: trend_kategorie
+      - name: Bezeichnung
         description: "Bezeichnung (z. B. steigend, fallend)"
         tests: [not_null]
       - name: beschreibung
