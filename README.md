@@ -86,13 +86,13 @@ veranstaltungen_manuell:
 
 ```
 ### veranstaltungen_gpt
-![Veranstaltungen_gpt](../dbt_implementations/Images/Veranstaltungen_gpt.png)
+![Veranstaltungen_gpt](Images/Veranstaltungen_gpt.png)
 
 ### veranstaltungen_manuell
-![Veranstaltungen_manuell](../dbt_implementations/Images/Veranstaltungen_manuell.png)
+![Veranstaltungen_manuell](Images/Veranstaltungen_manuell.png)
 
 ### covid_gpt
-![Covid_gpt](../dbt_implementations/Images/Covid_gpt.png)
+![Covid_gpt](Images/Covid_gpt.png)
 
 ### covid_manuell
-![Covid_manuell](../dbt_implementations/Images/Covid_manuell.png)
+![Covid_manuell](Images/Covid_manuell.png)
