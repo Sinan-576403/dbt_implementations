@@ -83,3 +83,16 @@ veranstaltungen_manuell:
       type: postgres
       user: sinan_fidan
   target: dev
+
+```
+### veranstaltungen_gpt
+![Veranstaltungen_gpt](../dbt_implementations/Images/Veranstaltungen_gpt.png)
+
+### veranstaltungen_manuell
+![Veranstaltungen_manuell](../dbt_implementations/Images/Veranstaltungen_manuell.png)
+
+### covid_gpt
+![Covid_gpt](../dbt_implementations/Images/Covid_gpt.png)
+
+### covid_manuell
+![Covid_manuell](../dbt_implementations/Images/Covid_manuell.png)
